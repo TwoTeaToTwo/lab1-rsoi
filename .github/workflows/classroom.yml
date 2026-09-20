@@ -12,11 +12,16 @@ on:
 permissions:
   contents: read
   packages: write
+  actions: read
+  checks: write
 
 jobs:
   build:
     name: Autograding
     runs-on: ubuntu-latest
+
+    env:
+      GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
 
     steps:
       - name: Checkout
@@ -164,10 +169,12 @@ jobs:
       - name: Github auto grader mark
         if: >-
           github.event_name == 'push' &&
-          vars.RENDER_DEPLOY_ENABLED == 'true'
+          vars.RENDER_DEPLOY_ENABLED == 'true' &&
+          env.GOOGLE_API_KEY != ''
+        continue-on-error: true
         uses: Romanow/google-sheet-autograder-marker@v1.0
         with:
-          google_token: ${{ secrets.GOOGLE_API_KEY }}
+          google_token: ${{ env.GOOGLE_API_KEY }}
           sheet_id: "1xkgjUX6Qmk7rdJG-QPOToav-HWWtthJjnShIKnw3oIY"
           homework_number: 1
           user_column: 'D'
